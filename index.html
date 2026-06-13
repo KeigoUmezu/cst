@@ -82,7 +82,7 @@
   .small-btn { font-size: 20px; padding: 10px 20px; margin-left: 10px; }
 
   /* 的（看板）のスタイル */
-  .target-wrapper { position: absolute; width: 70px; height: 90px; perspective: 600px; z-index: 10; }
+  .target-wrapper { position: absolute; perspective: 600px; z-index: 10; }
   .target-wrapper.random-wrapper { width: 40px; height: 40px; }
   .target {
     width: 100%; height: 100%;
@@ -98,7 +98,7 @@
   .target.down { transform: rotateX(90deg); }
   .target.bonus { background: radial-gradient(circle, #fff 30%, #9b59b6 35%, #9b59b6 45%, #fff 50%, #fff 60%, #9b59b6 65%); border-color: #8e44ad; color: #fff; }
   .target.moving-target { background: radial-gradient(circle, #fff 30%, #2ecc71 35%, #2ecc71 45%, #fff 50%, #fff 60%, #2ecc71 65%); border-color: #27ae60; color: #fff; border-radius: 50%; }
-  .target.random-target { background: radial-gradient(circle, #fff 30%, #f1c40f 35%, #f1c40f 45%, #fff 50%, #fff 60%, #f1c40f 65%); border-color: #f39c12; color: #d35400; border-radius: 50%; box-shadow: 0 0 30px #f1c40f; font-size: 14px; border-width: 2px; }
+  .target.random-target { background: radial-gradient(circle, #fff 30%, #f1c40f 35%, #f1c40f 45%, #fff 50%, #fff 60%, #f1c40f 65%); border-color: #f39c12; color: #d35400; border-radius: 50%; box-shadow: 0 0 30px #f1c40f, inset 0 0 15px #f39c12; }
   
   /* 連打的（高耐久的）のスタイル */
   .target.rapid-target {
@@ -109,14 +109,14 @@
   .target.rapid-target.hit-flash { background: #fff; color: #f00; } /* 叩いた時のフラッシュ */
 
   /* ボール・エフェクト・スコアポップ */
-  .ball { position: absolute; width: 30px; height: 30px; background: radial-gradient(circle at 30% 30%, #f39c12, #d35400); border-radius: 50%; box-shadow: 0 5px 10px rgba(0,0,0,0.5); z-index: 50; pointer-events: none; transition: all 0.2s linear; }
-  .hit-effect { position: absolute; font-size: 40px; font-weight: bold; color: #f1c40f; text-shadow: 3px 3px 0 #d35400, -2px -2px 0 #fff; pointer-events: none; animation: hitPop 0.6s forwards; z-index: 60; transform: translate(-50%, -50%); }
+  .ball { position: absolute; width: 30px; height: 30px; background: radial-gradient(circle at 30% 30%, #f39c12, #d35400); border-radius: 50%; box-shadow: 0 5px 10px rgba(0,0,0,0.5); z-index: 50; pointer-events: none; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+  .hit-effect { position: absolute; font-size: 40px; font-weight: bold; color: #f1c40f; text-shadow: 3px 3px 0 #d35400, -2px -2px 0 #fff; pointer-events: none; animation: hitPop 0.6s forwards; z-index: 60; }
   @keyframes hitPop { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 50% { transform: translate(-50%, -80%) scale(1.3); } 100% { opacity: 0; transform: translate(-50%, -100%) scale(1); } }
   #score-popup-container { position: absolute; right: 40px; bottom: 40px; z-index: 200; pointer-events: none; display: flex; flex-direction: column; align-items: flex-end; }
   .score-popup { text-align: right; animation: popBounce 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; margin-top: 10px; transform-origin: right center; }
   .score-popup .pts { font-size: 56px; font-weight: 900; color: #39ff14; -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0 #ff00ff, 0 0 15px rgba(57,255,20,0.8); display: block; line-height: 1; }
   .score-popup .tot { font-size: 28px; font-weight: bold; color: #fff; -webkit-text-stroke: 1px #000; text-shadow: 2px 2px 0 #ff4500; display: block; }
-  @keyframes popBounce { 0% { transform: scale(0) rotate(-15deg); opacity: 0; } 15% { transform: scale(1.2) rotate(5deg); opacity: 1; } 30% { transform: scale(1) rotate(-5deg); opacity: 1; } 80% { transform: scale(1) translateY(0); opacity: 1; } 100% { transform: scale(0.8) translateY(-50px); opacity: 0; } }
+  @keyframes popBounce { 0% { transform: scale(0) rotate(-15deg); opacity: 0; } 15% { transform: scale(1.2) rotate(5deg); opacity: 1; } 30% { transform: scale(1) rotate(-5deg); opacity: 1; } 80% { transform: scale(1) translateY(0); opacity: 1; } 100% { transform: scale(0.8) translateY(-80px); opacity: 0; } }
 
   /* UI・スクリーン画面 */
   .overlay-screen {
@@ -202,6 +202,16 @@
           <input type="number" id="cfg-intermission" min="2" max="30">
         </div>
 
+        <h3>通常の的サイズ設定</h3>
+        <div class="settings-row">
+          <label>幅 (px):</label>
+          <input type="number" id="cfg-target-width" min="50" max="200">
+        </div>
+        <div class="settings-row">
+          <label>高さ (px):</label>
+          <input type="number" id="cfg-target-height" min="50" max="200">
+        </div>
+
         <h3>連打的（ボス）設定</h3>
         <div class="settings-row">
           <label>ステージ最後に出現させる:</label>
@@ -277,6 +287,8 @@
     appConfig = {
       stageDurationSec: appConfig.stageDurationSec || 25,
       intermissionDurationSec: appConfig.intermissionDurationSec || 9,
+      targetWidth: appConfig.targetWidth || 70,
+      targetHeight: appConfig.targetHeight || 90,
       rapidEnable: appConfig.rapidEnable !== undefined ? appConfig.rapidEnable : true, // デフォルトON
       rapidHp: appConfig.rapidHp || 20,
       rapidSize: appConfig.rapidSize || 150,
@@ -291,6 +303,8 @@
     function loadSettingsToUI() {
       document.getElementById('cfg-stage-time').value = appConfig.stageDurationSec;
       document.getElementById('cfg-intermission').value = appConfig.intermissionDurationSec;
+      document.getElementById('cfg-target-width').value = appConfig.targetWidth;
+      document.getElementById('cfg-target-height').value = appConfig.targetHeight;
       document.getElementById('cfg-rapid-enable').checked = appConfig.rapidEnable;
       document.getElementById('cfg-rapid-hp').value = appConfig.rapidHp;
       document.getElementById('cfg-rapid-size').value = appConfig.rapidSize;
@@ -304,6 +318,8 @@
     function saveSettingsFromUI() {
       appConfig.stageDurationSec = parseInt(document.getElementById('cfg-stage-time').value) || 25;
       appConfig.intermissionDurationSec = Math.max(2, parseInt(document.getElementById('cfg-intermission').value) || 9);
+      appConfig.targetWidth = Math.max(50, parseInt(document.getElementById('cfg-target-width').value) || 70);
+      appConfig.targetHeight = Math.max(50, parseInt(document.getElementById('cfg-target-height').value) || 90);
       appConfig.rapidEnable = document.getElementById('cfg-rapid-enable').checked;
       appConfig.rapidHp = Math.max(1, parseInt(document.getElementById('cfg-rapid-hp').value) || 20);
       appConfig.rapidSize = Math.max(50, parseInt(document.getElementById('cfg-rapid-size').value) || 150);
@@ -501,7 +517,8 @@
     function spawnTargetGroup() {
       const cw = window.innerWidth, ch = window.innerHeight;
       const count = Math.floor(Math.random() * 3) + 2;
-      const targetW = 70, spacing = 30;
+      const targetW = appConfig.targetWidth;
+      const spacing = 30;
       const totalWidth = (targetW * count) + (spacing * (count - 1));
       const startX = Math.random() * (cw - totalWidth - 60) + 30;
       const startY = Math.random() * (ch - 250) + 100;
@@ -514,7 +531,10 @@
     function createStaticTarget(x, y, stayUpTime, isFormation) {
       const wrapper = document.createElement('div');
       wrapper.className = 'target-wrapper';
-      wrapper.style.left = `${x}px`; wrapper.style.top = `${y}px`;
+      wrapper.style.width = `${appConfig.targetWidth}px`;
+      wrapper.style.height = `${appConfig.targetHeight}px`;
+      wrapper.style.left = `${x}px`; 
+      wrapper.style.top = `${y}px`;
       const target = document.createElement('div');
       target.className = 'target';
       const isBonus = Math.random() > 0.8;
@@ -540,6 +560,8 @@
     function createMovingTarget() {
       const wrapper = document.createElement('div');
       wrapper.className = 'target-wrapper';
+      wrapper.style.width = `${appConfig.targetWidth}px`;
+      wrapper.style.height = `${appConfig.targetHeight}px`;
       const startY = Math.random() * (window.innerHeight - 300) + 100;
       const direction = Math.random() > 0.5 ? 1 : -1;
       const startX = direction === 1 ? -100 : window.innerWidth + 100;
