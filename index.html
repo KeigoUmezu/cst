@@ -38,6 +38,8 @@
   #settings-trigger {
     position: absolute;
     top: 0; left: 0; width: 80px; height: 80px; z-index: 900;
+    background-color: rgba(255, 255, 255, 0.01); 
+    -webkit-touch-callout: none; 
   }
 
   /* 重厚感のある緞帳（どんちょう） */
@@ -106,10 +108,17 @@
     border-color: #d35400; color: #fff; text-shadow: 2px 2px 0 #000; font-size: 36px;
     box-shadow: 0 0 40px #e67e22, inset 0 0 20px #000;
   }
-  .target.rapid-target.hit-flash { background: #fff; color: #f00; } /* 叩いた時のフラッシュ */
+  .target.rapid-target.hit-flash { background: #fff; color: #f00; } 
 
-  /* ボール・エフェクト・スコアポップ */
-  .ball { position: absolute; width: 30px; height: 30px; background: radial-gradient(circle at 30% 30%, #f39c12, #d35400); border-radius: 50%; box-shadow: 0 5px 10px rgba(0,0,0,0.5); z-index: 50; pointer-events: none; }
+  /* ★ボールのアニメーションに transition を追加 */
+  .ball { 
+    position: absolute; width: 30px; height: 30px; 
+    background: radial-gradient(circle at 30% 30%, #f39c12, #d35400); 
+    border-radius: 50%; box-shadow: 0 5px 10px rgba(0,0,0,0.5); 
+    z-index: 50; pointer-events: none; 
+    transition: left 0.15s ease-out, top 0.15s ease-out, transform 0.15s ease-in;
+  }
+  
   .hit-effect { position: absolute; font-size: 40px; font-weight: bold; color: #f1c40f; text-shadow: 3px 3px 0 #d35400, -2px -2px 0 #fff; pointer-events: none; animation: hitPop 0.6s forwards; z-index: 150; }
   @keyframes hitPop { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 50% { transform: translate(-50%, -80%) scale(1.3); } 100% { opacity: 0; transform: translate(-50%, -100%) scale(1); } }
   #score-popup-container { position: absolute; right: 40px; bottom: 40px; z-index: 200; pointer-events: none; display: flex; flex-direction: column; align-items: flex-end; }
@@ -140,8 +149,7 @@
   .settings-box {
     background: #34495e; border: 4px solid #f1c40f; border-radius: 15px;
     padding: 20px 30px; text-align: left; color: white; width: 500px;
-    max-height: 80vh; overflow-y: auto; /* スクロール可能に */
-    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
   }
   .settings-box h2 { color: #f1c40f; margin-top:0; text-align: center; border-bottom: 2px solid #e67e22; padding-bottom: 10px;}
   .settings-box h3 { color: #39ff14; font-size: 20px; margin: 20px 0 10px 0; }
@@ -310,7 +318,7 @@
   <script>
     // --- オーディオコンテキストと効果音生成 ---
     let audioContext;
-    let masterVolume = 0.5; // デフォルト: 50%
+    let masterVolume = 0.5;
     
     function initAudio() {
       if (!audioContext) {
@@ -318,80 +326,60 @@
       }
     }
 
-    // かわいい発射音（ピコッ）
     function playCuteShootSound() {
       initAudio();
       const now = audioContext.currentTime;
       const osc = audioContext.createOscillator();
       const gain = audioContext.createGain();
-      
       osc.connect(gain);
       gain.connect(audioContext.destination);
-      
       osc.frequency.setValueAtTime(600, now);
       osc.frequency.exponentialRampToValueAtTime(900, now + 0.1);
-      
       gain.gain.setValueAtTime(0.3 * masterVolume, now);
       gain.gain.exponentialRampToValueAtTime(0.01 * masterVolume, now + 0.1);
-      
       osc.start(now);
       osc.stop(now + 0.1);
     }
 
-    // パーンという気持ちいい破壊音（ボスやボーナス）
     function playPowHitSound() {
       initAudio();
       const now = audioContext.currentTime;
-      
-      // メイン音（低～中域で気持ちいい）
       const osc1 = audioContext.createOscillator();
       const gain1 = audioContext.createGain();
       osc1.type = 'sine';
       osc1.connect(gain1);
       gain1.connect(audioContext.destination);
-      
       osc1.frequency.setValueAtTime(150, now);
       osc1.frequency.linearRampToValueAtTime(80, now + 0.15);
-      
       gain1.gain.setValueAtTime(0.4 * masterVolume, now);
       gain1.gain.exponentialRampToValueAtTime(0.01 * masterVolume, now + 0.15);
-      
       osc1.start(now);
       osc1.stop(now + 0.15);
       
-      // 高域成分（スッ感）
       const osc2 = audioContext.createOscillator();
       const gain2 = audioContext.createGain();
       osc2.type = 'square';
       osc2.connect(gain2);
       gain2.connect(audioContext.destination);
-      
       osc2.frequency.setValueAtTime(600, now);
       osc2.frequency.exponentialRampToValueAtTime(200, now + 0.1);
-      
       gain2.gain.setValueAtTime(0.2 * masterVolume, now);
       gain2.gain.exponentialRampToValueAtTime(0 * masterVolume, now + 0.1);
-      
       osc2.start(now);
       osc2.stop(now + 0.1);
     }
 
-    // 通常の的を叩く音（軽い音）
     function playNormalHitSound() {
       initAudio();
       const now = audioContext.currentTime;
       const osc = audioContext.createOscillator();
       const gain = audioContext.createGain();
-      
       osc.connect(gain);
       gain.connect(audioContext.destination);
-      
       osc.frequency.setValueAtTime(400, now);
       osc.frequency.exponentialRampToValueAtTime(200, now + 0.08);
-      
       gain.gain.setValueAtTime(0.2 * masterVolume, now);
       gain.gain.exponentialRampToValueAtTime(0, now + 0.08);
-      
       osc.start(now);
       osc.stop(now + 0.08);
     }
@@ -427,13 +415,11 @@
     const colorBgSection = document.getElementById('color-bg-section');
     const imageBgSection = document.getElementById('image-bg-section');
 
-    // ボリュームスライダーの表示更新
     volumeSlider.addEventListener('input', (e) => {
       masterVolume = parseInt(e.target.value) / 100;
       volumeDisplay.textContent = e.target.value + '%';
     });
 
-    // 背景モード切り替え
     bgModeRadios.forEach(radio => {
       radio.addEventListener('change', (e) => {
         if (e.target.value === 'color') {
@@ -446,7 +432,7 @@
       });
     });
 
-    // ファイル入力イベントリスナー（Data URLに変換して保存）
+    // 画像自動圧縮
     for(let i=1; i<=5; i++) {
       const fileInput = document.getElementById(`cfg-img-${i}`);
       const preview = document.getElementById(`preview-${i}`);
@@ -455,19 +441,40 @@
         if (file) {
           const reader = new FileReader();
           reader.onload = (event) => {
-            appConfig.bgImages[i-1] = event.target.result;
-            preview.textContent = '✓ 画像読み込み完了';
-            console.log(`Stage ${i} image loaded`);
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              const MAX_WIDTH = 1280;
+              const MAX_HEIGHT = 720;
+              let width = img.width;
+              let height = img.height;
+              if (width > height) {
+                if (width > MAX_WIDTH) {
+                  height *= MAX_WIDTH / width;
+                  width = MAX_WIDTH;
+                }
+              } else {
+                if (height > MAX_HEIGHT) {
+                  width *= MAX_HEIGHT / height;
+                  height = MAX_HEIGHT;
+                }
+              }
+              canvas.width = width;
+              canvas.height = height;
+              ctx.drawImage(img, 0, 0, width, height);
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+              appConfig.bgImages[i-1] = compressedDataUrl;
+              preview.textContent = '✓ 画像読み込み・圧縮完了';
+            };
+            img.src = event.target.result;
           };
           reader.readAsDataURL(file);
         }
       });
     }
 
-    // --- コンフィグ（設定値）の初期化とマイグレーション ---
     let appConfig = JSON.parse(localStorage.getItem('carnivalConfig')) || {};
-    
-    // デフォルト値の補完（新しく追加された項目への対応）
     appConfig = {
       stageDurationSec: appConfig.stageDurationSec || 25,
       intermissionDurationSec: appConfig.intermissionDurationSec || 9,
@@ -483,10 +490,8 @@
       bgImages: appConfig.bgImages || ['', '', '', '', ''],
       masterVolume: appConfig.masterVolume || 50
     };
-    
     let highScores = JSON.parse(localStorage.getItem('carnivalHighScores')) || [];
 
-    // --- 設定画面の入出力 ---
     function loadSettingsToUI() {
       document.getElementById('cfg-stage-time').value = appConfig.stageDurationSec;
       document.getElementById('cfg-intermission').value = appConfig.intermissionDurationSec;
@@ -497,8 +502,6 @@
       document.getElementById('cfg-rapid-size').value = appConfig.rapidSize;
       document.getElementById('cfg-rapid-count').value = appConfig.rapidCount;
       document.getElementById('cfg-rapid-pos').value = appConfig.rapidPos;
-      
-      // 背景モードの設定
       document.querySelector(`input[name="bg-mode"][value="${appConfig.bgMode}"]`).checked = true;
       if (appConfig.bgMode === 'color') {
         colorBgSection.style.display = '';
@@ -507,485 +510,5 @@
         colorBgSection.style.display = 'none';
         imageBgSection.style.display = '';
       }
-      
-      // 色とプレビューを復元
       for(let i=1; i<=5; i++) {
-        document.getElementById(`cfg-bg-${i}`).value = appConfig.bgColors[i-1];
-        const preview = document.getElementById(`preview-${i}`);
-        if (appConfig.bgImages[i-1]) {
-          preview.textContent = '✓ 画像設定済み';
-        } else {
-          preview.textContent = '';
-        }
-      }
-      document.getElementById('cfg-master-volume').value = appConfig.masterVolume;
-      volumeDisplay.textContent = appConfig.masterVolume + '%';
-      masterVolume = appConfig.masterVolume / 100;
-    }
-
-    function saveSettingsFromUI() {
-      appConfig.stageDurationSec = parseInt(document.getElementById('cfg-stage-time').value) || 25;
-      appConfig.intermissionDurationSec = Math.max(2, parseInt(document.getElementById('cfg-intermission').value) || 9);
-      appConfig.targetWidth = Math.max(50, parseInt(document.getElementById('cfg-target-width').value) || 70);
-      appConfig.targetHeight = Math.max(50, parseInt(document.getElementById('cfg-target-height').value) || 90);
-      appConfig.rapidEnable = document.getElementById('cfg-rapid-enable').checked;
-      appConfig.rapidHp = Math.max(1, parseInt(document.getElementById('cfg-rapid-hp').value) || 20);
-      appConfig.rapidSize = Math.max(50, parseInt(document.getElementById('cfg-rapid-size').value) || 150);
-      appConfig.rapidCount = Math.max(1, parseInt(document.getElementById('cfg-rapid-count').value) || 1);
-      appConfig.rapidPos = document.getElementById('cfg-rapid-pos').value;
-      appConfig.bgMode = document.querySelector('input[name="bg-mode"]:checked').value;
-      appConfig.masterVolume = parseInt(document.getElementById('cfg-master-volume').value) || 50;
-      
-      let newBgs = [];
-      for(let i=1; i<=5; i++) {
-        newBgs.push(document.getElementById(`cfg-bg-${i}`).value);
-      }
-      appConfig.bgColors = newBgs;
-
-      masterVolume = appConfig.masterVolume / 100;
-      // bgImagesは既にappConfig内で更新されているため、ここで改めて保存
-      localStorage.setItem('carnivalConfig', JSON.stringify(appConfig));
-      settingsScreen.classList.add('hidden');
-    }
-
-    // 長押し設定トリガー
-    let pressTimer;
-    settingsTrigger.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      pressTimer = window.setTimeout(() => {
-        loadSettingsToUI();
-        settingsScreen.classList.remove('hidden');
-      }, 2000);
-    });
-    settingsTrigger.addEventListener('pointerup', () => clearTimeout(pressTimer));
-    settingsTrigger.addEventListener('pointerleave', () => clearTimeout(pressTimer));
-    settingsTrigger.addEventListener('pointercancel', () => clearTimeout(pressTimer));
-    saveSettingsBtn.addEventListener('click', saveSettingsFromUI);
-
-    // 初期ボリュームを設定
-    masterVolume = appConfig.masterVolume / 100;
-
-    // --- ランキング処理 ---
-    updateRankingTables();
-
-    function isHighScore(score) {
-      if (score === 0) return false;
-      if (highScores.length < 10) return true;
-      return score > highScores[highScores.length - 1].score;
-    }
-
-    function saveHighScore(name, score) {
-      const entryName = name.trim().toUpperCase() || "UNKNOWN";
-      highScores.push({ name: entryName, score: score });
-      highScores.sort((a, b) => b.score - a.score);
-      highScores = highScores.slice(0, 10);
-      localStorage.setItem('carnivalHighScores', JSON.stringify(highScores));
-      updateRankingTables();
-    }
-
-    function updateRankingTables() {
-      const generateHTML = (scores) => {
-        if (scores.length === 0) return `<tr><td colspan="3" style="text-align:center;">NO DATA</td></tr>`;
-        return scores.map((s, i) => {
-          let rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
-          return `<tr class="${rankClass}"><td>${i + 1}</td><td style="text-align: left;">${s.name}</td><td style="text-align: right;">${s.score}</td></tr>`;
-        }).join('');
-      };
-      const html = generateHTML(highScores);
-      titleRankingTable.innerHTML = html;
-      resultRankingTable.innerHTML = html;
-    }
-
-    // --- ゲーム状態管理 ---
-    let totalScore = 0, totalHits = 0, stageScore = 0, stageHits = 0;
-    let currentStage = 1;
-    const maxStages = 5;
-    let isStageActive = false;
-    let spawnInterval;
-    let animationFrames = [];
-
-    startBtn.addEventListener('click', () => { titleScreen.classList.add('hidden'); startGame(); });
-    restartBtn.addEventListener('click', () => {
-      curtainContent.classList.add('invisible');
-      setTimeout(() => {
-        restartBtn.classList.add('hidden');
-        resultRankingArea.classList.add('hidden');
-        resultArea.classList.remove('hidden');
-        startGame();
-      }, 500); 
-    });
-
-    function startGame() {
-      totalScore = 0; totalHits = 0; currentStage = 1;
-      runStageSequence();
-    }
-
-    function runStageSequence() {
-      stageScore = 0; stageHits = 0; isStageActive = false;
-      
-      // 背景の適用
-      if (appConfig.bgMode === 'color') {
-        container.style.backgroundColor = appConfig.bgColors[currentStage - 1];
-        container.style.backgroundImage = 'linear-gradient(rgba(255,255,255,0.05) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.05) 2px, transparent 2px)';
-        container.style.backgroundSize = '60px 60px';
-      } else {
-        container.style.backgroundColor = '#000';
-        const imgUrl = appConfig.bgImages[currentStage - 1];
-        if (imgUrl) {
-          container.style.backgroundImage = `url('${imgUrl}')`;
-          container.style.backgroundSize = 'cover';
-          container.style.backgroundPosition = 'center';
-        } else {
-          container.style.backgroundColor = '#34495e';
-          container.style.backgroundImage = 'linear-gradient(rgba(255,255,255,0.05) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.05) 2px, transparent 2px)';
-          container.style.backgroundSize = '60px 60px';
-        }
-      }
-
-      createFormation();
-
-      setTimeout(() => {
-        curtain.classList.add('open-up');
-        
-        setTimeout(() => {
-          isStageActive = true;
-          startSpawning();
-          
-          const stageTimeMs = appConfig.stageDurationSec * 1000;
-          
-          // 最終ステージの5000点的（半分の時間で出現）
-          if (currentStage === maxStages) {
-            setTimeout(() => { if (isStageActive) createRandomTarget(); }, stageTimeMs / 2);
-          }
-
-          // ★連打的の出現（ステージ終了の5秒前）
-          if (appConfig.rapidEnable) {
-            let rapidSpawnTime = stageTimeMs - 5000;
-            if (rapidSpawnTime < 0) rapidSpawnTime = 0;
-            setTimeout(() => { if (isStageActive) spawnRapidTargets(); }, rapidSpawnTime);
-          }
-          
-          setTimeout(() => endStageSequence(), stageTimeMs);
-        }, 2500);
-      }, 1000);
-    }
-
-    function endStageSequence() {
-      isStageActive = false;
-      clearInterval(spawnInterval);
-      
-      document.querySelectorAll('.target.up').forEach(t => {
-        t.classList.remove('up'); t.classList.add('down');
-      });
-
-      setTimeout(() => {
-        curtain.classList.remove('open-up');
-        setTimeout(() => {
-          document.querySelectorAll('.target-wrapper').forEach(el => el.remove());
-          animationFrames.forEach(cancelAnimationFrame);
-          animationFrames = [];
-          showIntermission();
-        }, 2500);
-      }, 500);
-    }
-
-    function showIntermission() {
-      imStageScore.textContent = stageScore; imStageHits.textContent = stageHits; imTotalScore.textContent = totalScore;
-      resultArea.classList.remove('hidden'); nameEntryArea.classList.add('hidden'); resultRankingArea.classList.add('hidden'); restartBtn.classList.add('hidden');
-
-      if (currentStage >= maxStages) {
-        imTitle.textContent = "ALL STAGE CLEAR!!"; imTitle.style.color = "#39ff14";
-        curtainContent.classList.remove('invisible');
-        if (isHighScore(totalScore)) {
-          setTimeout(() => {
-            resultArea.classList.add('hidden'); nameEntryArea.classList.remove('hidden');
-            nameInput.value = ''; nameInput.focus();
-          }, 2000);
-        } else {
-          setTimeout(() => {
-            resultArea.classList.add('hidden'); resultRankingArea.classList.remove('hidden'); restartBtn.classList.remove('hidden');
-          }, 3000);
-        }
-      } else {
-        imTitle.textContent = `STAGE ${currentStage} CLEAR!`; imTitle.style.color = "#ffd700";
-        curtainContent.classList.remove('invisible');
-        setTimeout(() => {
-          curtainContent.classList.add('invisible');
-          setTimeout(() => { currentStage++; runStageSequence(); }, 800); 
-        }, appConfig.intermissionDurationSec * 1000); 
-      }
-    }
-
-    registerBtn.addEventListener('click', () => {
-      saveHighScore(nameInput.value, totalScore);
-      nameEntryArea.classList.add('hidden'); resultRankingArea.classList.remove('hidden'); restartBtn.classList.remove('hidden');
-    });
-
-    // --- 的の生成ロジック ---
-    function createFormation() {
-      const rows = 2, cols = 4;
-      const cw = window.innerWidth, ch = window.innerHeight;
-      const xSpacing = (cw * 0.6) / (cols - 1);
-      const startX = (cw - (cw * 0.6)) / 2; 
-      const startY = ch * 0.4;
-      const ySpacing = 130;
-      for(let r=0; r < rows; r++) {
-        for(let c=0; c < cols; c++) {
-          createStaticTarget(startX + c * xSpacing, startY + r * ySpacing, 10000, true);
-        }
-      }
-    }
-
-    function startSpawning() {
-      const spawnRate = Math.max(800, 2000 - (currentStage * 250));
-      spawnInterval = setInterval(() => {
-        if (!isStageActive) return;
-        spawnTargetGroup();
-        if (Math.random() < 0.2) createMovingTarget();
-      }, spawnRate);
-    }
-
-    function spawnTargetGroup() {
-      const cw = window.innerWidth, ch = window.innerHeight;
-      const count = Math.floor(Math.random() * 3) + 2;
-      const targetW = appConfig.targetWidth;
-      const spacing = 30;
-      const totalWidth = (targetW * count) + (spacing * (count - 1));
-      const startX = Math.random() * (cw - totalWidth - 60) + 30;
-      const startY = Math.random() * (ch - 250) + 100;
-      const stayUpTime = Math.max(1500, 4000 - (currentStage * 500));
-      for (let i = 0; i < count; i++) {
-        createStaticTarget(startX + i * (targetW + spacing), startY, stayUpTime, false);
-      }
-    }
-
-    function createStaticTarget(x, y, stayUpTime, isFormation) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'target-wrapper';
-      wrapper.style.width = `${appConfig.targetWidth}px`;
-      wrapper.style.height = `${appConfig.targetHeight}px`;
-      wrapper.style.left = `${x}px`; 
-      wrapper.style.top = `${y}px`;
-      const target = document.createElement('div');
-      target.className = 'target';
-      const isBonus = Math.random() > 0.8;
-      const points = isBonus ? 500 : 100;
-      target.dataset.points = points; target.textContent = points;
-      if (isBonus) target.classList.add('bonus');
-      wrapper.appendChild(target); container.appendChild(wrapper);
-      if (isFormation) {
-        target.classList.add('up'); target.classList.remove('down');
-      } else {
-        setTimeout(() => {
-          if (!isStageActive) return; target.classList.add('up'); target.classList.remove('down');
-        }, Math.random() * 300);
-      }
-      setTimeout(() => {
-        if (target.classList.contains('up')) {
-          target.classList.remove('up'); target.classList.add('down');
-          setTimeout(() => wrapper.remove(), 300);
-        }
-      }, isFormation ? stayUpTime + 3000 : stayUpTime); 
-    }
-
-    function createMovingTarget() {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'target-wrapper';
-      wrapper.style.width = `${appConfig.targetWidth}px`;
-      wrapper.style.height = `${appConfig.targetHeight}px`;
-      const startY = Math.random() * (window.innerHeight - 300) + 100;
-      const direction = Math.random() > 0.5 ? 1 : -1;
-      const startX = direction === 1 ? -100 : window.innerWidth + 100;
-      wrapper.style.left = `${startX}px`; wrapper.style.top = `${startY}px`;
-      const target = document.createElement('div');
-      target.className = 'target up moving-target';
-      target.dataset.points = 1000; target.textContent = "1000";
-      wrapper.appendChild(target); container.appendChild(wrapper);
-      const speed = Math.random() * 4 + 4;
-      let currentX = startX;
-      function move() {
-        if (!isStageActive || !container.contains(wrapper)) return;
-        currentX += speed * direction; wrapper.style.left = `${currentX}px`;
-        if ((direction === 1 && currentX > window.innerWidth + 100) || (direction === -1 && currentX < -100)) wrapper.remove();
-        else animationFrames.push(requestAnimationFrame(move));
-      }
-      animationFrames.push(requestAnimationFrame(move));
-    }
-
-    function createRandomTarget() {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'target-wrapper random-wrapper'; 
-      let x = window.innerWidth / 2, y = window.innerHeight / 2;
-      let vx = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 7 + 15);
-      let vy = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 7 + 15);
-      wrapper.style.left = `${x}px`; wrapper.style.top = `${y}px`; wrapper.style.zIndex = "30"; 
-      const target = document.createElement('div');
-      target.className = 'target up random-target';
-      target.dataset.points = 5000; target.textContent = "5k"; 
-      wrapper.appendChild(target); container.appendChild(wrapper);
-      function move() {
-        if (!isStageActive || !container.contains(wrapper)) return;
-        x += vx; y += vy;
-        if (x < 10 || x > window.innerWidth - 50) vx *= -1;
-        if (y < 10 || y > window.innerHeight - 80) vy *= -1;
-        wrapper.style.left = `${x}px`; wrapper.style.top = `${y}px`;
-        animationFrames.push(requestAnimationFrame(move));
-      }
-      animationFrames.push(requestAnimationFrame(move));
-    }
-
-    // ★連打的（ボス）の生成
-    function spawnRapidTargets() {
-      const count = appConfig.rapidCount;
-      const size = appConfig.rapidSize;
-      const pos = appConfig.rapidPos;
-      const spacing = 40;
-      const totalW = (size * count) + (spacing * (count - 1));
-      
-      const cw = window.innerWidth;
-      const ch = window.innerHeight;
-      
-      for(let i = 0; i < count; i++) {
-        let x, y;
-        y = ch - size - 100;
-        
-        if (pos === 'random') {
-          x = Math.random() * (cw - size - 40) + 20;
-          y = Math.random() * (ch - size - 150) + 50;
-        } else if (pos === 'left') {
-          x = 50 + i * (size + spacing);
-        } else if (pos === 'right') {
-          x = cw - totalW - 50 + i * (size + spacing);
-        } else { // center
-          x = (cw - totalW) / 2 + i * (size + spacing);
-        }
-
-        createRapidTarget(x, y, size);
-      }
-    }
-
-    function createRapidTarget(x, y, size) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'target-wrapper';
-      wrapper.style.width = `${size}px`;
-      wrapper.style.height = `${size}px`;
-      wrapper.style.left = `${x}px`;
-      wrapper.style.top = `${y}px`;
-      wrapper.style.zIndex = "40";
-
-      const target = document.createElement('div');
-      target.className = 'target rapid-target';
-      target.dataset.hp = appConfig.rapidHp;
-      target.textContent = appConfig.rapidHp;
-
-      wrapper.appendChild(target);
-      container.appendChild(wrapper);
-
-      setTimeout(() => {
-        if (isStageActive) {
-          target.classList.add('up');
-          target.classList.remove('down');
-        }
-      }, 100);
-    }
-
-    // --- 射撃とスコア処理 ---
-    function addScore(points) {
-      totalScore += points; stageScore += points;
-      totalHits++; stageHits++;
-      const popup = document.createElement('div');
-      popup.className = 'score-popup';
-      popup.innerHTML = `<span class="pts">+${points}</span><span class="tot">TOTAL: ${totalScore}</span>`;
-      scorePopupContainer.appendChild(popup);
-      setTimeout(() => { if (scorePopupContainer.contains(popup)) popup.remove(); }, 2000);
-    }
-
-    container.addEventListener('pointerdown', (e) => {
-      if (e.clientX < 80 && e.clientY < 80 && !isStageActive) return;
-      if (!isStageActive) return; 
-      e.preventDefault(); 
-      const clickX = e.clientX, clickY = e.clientY;
-      shootBall(clickX, clickY);
-      playCuteShootSound();
-
-      let targetEl = e.target.closest('.target');
-      if (targetEl && targetEl.classList.contains('up')) {
-        
-        if (targetEl.classList.contains('rapid-target')) {
-          let currentHp = parseInt(targetEl.dataset.hp);
-          currentHp--;
-          
-          if (currentHp > 0) {
-            targetEl.dataset.hp = currentHp;
-            targetEl.textContent = currentHp;
-            
-            targetEl.classList.add('hit-flash');
-            setTimeout(() => targetEl.classList.remove('hit-flash'), 100);
-            
-            setTimeout(() => {
-              addScore(100);
-              showHitEffect(clickX, clickY, 100);
-              playNormalHitSound();
-            }, 150);
-          } else {
-            targetEl.classList.remove('up');
-            setTimeout(() => {
-              targetEl.classList.add('down');
-              addScore(5000);
-              showHitEffect(clickX, clickY, 5000);
-              playPowHitSound();
-              setTimeout(() => targetEl.closest('.target-wrapper').remove(), 300);
-            }, 150);
-          }
-        } 
-        else {
-          const points = parseInt(targetEl.dataset.points);
-          targetEl.classList.remove('up');
-          setTimeout(() => {
-            if (targetEl.classList.contains('moving-target') || targetEl.classList.contains('random-target')) {
-              targetEl.closest('.target-wrapper').remove();
-            } else {
-              targetEl.classList.add('down');
-            }
-            addScore(points);
-            showHitEffect(clickX, clickY, points);
-            
-            if (points >= 5000) {
-              playPowHitSound();
-            } else if (points >= 1000) {
-              playNormalHitSound();
-            } else if (points >= 500) {
-              playNormalHitSound();
-            } else {
-              playNormalHitSound();
-            }
-          }, 150); 
-        }
-      }
-    });
-
-    function shootBall(targetX, targetY) {
-      const ball = document.createElement('div');
-      ball.className = 'ball';
-      const startX = window.innerWidth / 2 - 15;
-      const startY = window.innerHeight - 30;
-      ball.style.left = `${startX}px`; ball.style.top = `${startY}px`;
-      ball.style.transform = 'scale(2)';
-      container.appendChild(ball);
-      ball.getBoundingClientRect(); 
-      ball.style.left = `${targetX - 15}px`; ball.style.top = `${targetY - 15}px`;
-      ball.style.transform = 'scale(0.3)';
-      setTimeout(() => { if (container.contains(ball)) ball.remove(); }, 200);
-    }
-
-    function showHitEffect(x, y, points) {
-      const effect = document.createElement('div');
-      effect.className = 'hit-effect';
-      effect.textContent = `+${points}`;
-      effect.style.left = `${x}px`; effect.style.top = `${y}px`;
-      container.appendChild(effect);
-      setTimeout(() => { if (container.contains(effect)) effect.remove(); }, 600);
-    }
-  </script>
-</body>
-</html>
+        document.getElementById(`cfg-bg-${i}`).value = appConfig.bgColors
