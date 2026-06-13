@@ -98,7 +98,7 @@
   .target.down { transform: rotateX(90deg); }
   .target.bonus { background: radial-gradient(circle, #fff 30%, #9b59b6 35%, #9b59b6 45%, #fff 50%, #fff 60%, #9b59b6 65%); border-color: #8e44ad; color: #fff; }
   .target.moving-target { background: radial-gradient(circle, #fff 30%, #2ecc71 35%, #2ecc71 45%, #fff 50%, #fff 60%, #2ecc71 65%); border-color: #27ae60; color: #fff; border-radius: 50%; }
-  .target.random-target { background: radial-gradient(circle, #fff 30%, #f1c40f 35%, #f1c40f 45%, #fff 50%, #fff 60%, #f1c40f 65%); border-color: #f39c12; color: #d35400; border-radius: 50%; box-shadow: 0 0 30px rgba(241,196,15,0.8); }
+  .target.random-target { background: radial-gradient(circle, #fff 30%, #f1c40f 35%, #f1c40f 45%, #fff 50%, #fff 60%, #f1c40f 65%); border-color: #f39c12; color: #d35400; border-radius: 50%; box-shadow: 0 0 30px #f39c12, 0 10px 15px rgba(0,0,0,0.6); }
   
   /* 連打的（高耐久的）のスタイル */
   .target.rapid-target {
@@ -116,7 +116,7 @@
   .score-popup { text-align: right; animation: popBounce 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; margin-top: 10px; transform-origin: right center; }
   .score-popup .pts { font-size: 56px; font-weight: 900; color: #39ff14; -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0 #ff00ff, 0 0 15px rgba(57,255,20,0.8); display: block; line-height: 1; }
   .score-popup .tot { font-size: 28px; font-weight: bold; color: #fff; -webkit-text-stroke: 1px #000; text-shadow: 2px 2px 0 #ff4500; display: block; }
-  @keyframes popBounce { 0% { transform: scale(0) rotate(-15deg); opacity: 0; } 15% { transform: scale(1.2) rotate(5deg); opacity: 1; } 30% { transform: scale(1) rotate(-5deg); opacity: 1; } 80% { transform: scale(1) rotate(0); opacity: 1; } 100% { transform: scale(0) rotate(15deg); opacity: 0; } }
+  @keyframes popBounce { 0% { transform: scale(0) rotate(-15deg); opacity: 0; } 15% { transform: scale(1.2) rotate(5deg); opacity: 1; } 30% { transform: scale(1) rotate(-5deg); opacity: 1; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
 
   /* UI・スクリーン画面 */
   .overlay-screen {
@@ -139,7 +139,7 @@
   /* 設定画面スタイル */
   .settings-box {
     background: #34495e; border: 4px solid #f1c40f; border-radius: 15px;
-    padding: 20px 30px; text-align: left; color: white; width: 450px;
+    padding: 20px 30px; text-align: left; color: white; width: 500px;
     max-height: 80vh; overflow-y: auto; /* スクロール可能に */
     box-shadow: 0 20px 50px rgba(0,0,0,0.8);
   }
@@ -150,7 +150,11 @@
   .settings-row input[type="color"] { width: 60px; height: 35px; border: none; cursor: pointer; background: transparent; }
   .settings-row input[type="checkbox"] { width: 25px; height: 25px; cursor: pointer; }
   .settings-row input[type="range"] { width: 150px; height: 6px; cursor: pointer; }
+  .settings-row input[type="file"] { font-size: 14px; padding: 5px; border-radius: 5px; border: 2px solid #e67e22; flex: 1; margin-right: 10px; }
   .volume-display { color: #39ff14; font-weight: bold; min-width: 50px; }
+  .bg-mode-toggle { display: flex; gap: 10px; }
+  .bg-mode-toggle label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 16px; }
+  .bg-mode-toggle input[type="radio"] { width: 18px; height: 18px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -241,12 +245,30 @@
           </select>
         </div>
 
-        <h3>背景色設定</h3>
-        <div class="settings-row"><label>STAGE 1:</label><input type="color" id="cfg-bg-1"></div>
-        <div class="settings-row"><label>STAGE 2:</label><input type="color" id="cfg-bg-2"></div>
-        <div class="settings-row"><label>STAGE 3:</label><input type="color" id="cfg-bg-3"></div>
-        <div class="settings-row"><label>STAGE 4:</label><input type="color" id="cfg-bg-4"></div>
-        <div class="settings-row"><label>STAGE 5:</label><input type="color" id="cfg-bg-5"></div>
+        <h3>背景設定</h3>
+        <div class="settings-row">
+          <label>背景タイプ:</label>
+          <div class="bg-mode-toggle">
+            <label><input type="radio" name="bg-mode" value="color"> 色</label>
+            <label><input type="radio" name="bg-mode" value="image"> 画像</label>
+          </div>
+        </div>
+        
+        <div id="color-bg-section">
+          <div class="settings-row"><label>STAGE 1:</label><input type="color" id="cfg-bg-1"></div>
+          <div class="settings-row"><label>STAGE 2:</label><input type="color" id="cfg-bg-2"></div>
+          <div class="settings-row"><label>STAGE 3:</label><input type="color" id="cfg-bg-3"></div>
+          <div class="settings-row"><label>STAGE 4:</label><input type="color" id="cfg-bg-4"></div>
+          <div class="settings-row"><label>STAGE 5:</label><input type="color" id="cfg-bg-5"></div>
+        </div>
+
+        <div id="image-bg-section" style="display: none;">
+          <div class="settings-row"><label>STAGE 1:</label><input type="file" id="cfg-img-1" accept="image/*"></div>
+          <div class="settings-row"><label>STAGE 2:</label><input type="file" id="cfg-img-2" accept="image/*"></div>
+          <div class="settings-row"><label>STAGE 3:</label><input type="file" id="cfg-img-3" accept="image/*"></div>
+          <div class="settings-row"><label>STAGE 4:</label><input type="file" id="cfg-img-4" accept="image/*"></div>
+          <div class="settings-row"><label>STAGE 5:</label><input type="file" id="cfg-img-5" accept="image/*"></div>
+        </div>
 
         <h3>サウンド設定</h3>
         <div class="settings-row">
@@ -380,11 +402,27 @@
     const saveSettingsBtn = document.getElementById('save-settings-btn');
     const volumeSlider = document.getElementById('cfg-master-volume');
     const volumeDisplay = document.getElementById('volume-display');
+    const bgModeRadios = document.querySelectorAll('input[name="bg-mode"]');
+    const colorBgSection = document.getElementById('color-bg-section');
+    const imageBgSection = document.getElementById('image-bg-section');
 
     // ボリュームスライダーの表示更新
     volumeSlider.addEventListener('input', (e) => {
       masterVolume = parseInt(e.target.value) / 100;
       volumeDisplay.textContent = e.target.value + '%';
+    });
+
+    // 背景モード切り替え
+    bgModeRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.value === 'color') {
+          colorBgSection.style.display = '';
+          imageBgSection.style.display = 'none';
+        } else {
+          colorBgSection.style.display = 'none';
+          imageBgSection.style.display = '';
+        }
+      });
     });
 
     // --- コンフィグ（設定値）の初期化とマイグレーション ---
@@ -396,13 +434,15 @@
       intermissionDurationSec: appConfig.intermissionDurationSec || 9,
       targetWidth: appConfig.targetWidth || 70,
       targetHeight: appConfig.targetHeight || 90,
-      rapidEnable: appConfig.rapidEnable !== undefined ? appConfig.rapidEnable : true, // デフォルトON
+      rapidEnable: appConfig.rapidEnable !== undefined ? appConfig.rapidEnable : true,
       rapidHp: appConfig.rapidHp || 20,
       rapidSize: appConfig.rapidSize || 150,
       rapidCount: appConfig.rapidCount || 1,
       rapidPos: appConfig.rapidPos || 'center',
+      bgMode: appConfig.bgMode || 'color',
       bgColors: appConfig.bgColors || ['#34495e', '#2c3e50', '#8e44ad', '#27ae60', '#c0392b'],
-      masterVolume: appConfig.masterVolume || 50 // デフォルト: 50%
+      bgImages: appConfig.bgImages || ['', '', '', '', ''],
+      masterVolume: appConfig.masterVolume || 50
     };
     
     let highScores = JSON.parse(localStorage.getItem('carnivalHighScores')) || [];
@@ -418,6 +458,17 @@
       document.getElementById('cfg-rapid-size').value = appConfig.rapidSize;
       document.getElementById('cfg-rapid-count').value = appConfig.rapidCount;
       document.getElementById('cfg-rapid-pos').value = appConfig.rapidPos;
+      
+      // 背景モードの設定
+      document.querySelector(`input[name="bg-mode"][value="${appConfig.bgMode}"]`).checked = true;
+      if (appConfig.bgMode === 'color') {
+        colorBgSection.style.display = '';
+        imageBgSection.style.display = 'none';
+      } else {
+        colorBgSection.style.display = 'none';
+        imageBgSection.style.display = '';
+      }
+      
       for(let i=1; i<=5; i++) {
         document.getElementById(`cfg-bg-${i}`).value = appConfig.bgColors[i-1];
       }
@@ -436,6 +487,7 @@
       appConfig.rapidSize = Math.max(50, parseInt(document.getElementById('cfg-rapid-size').value) || 150);
       appConfig.rapidCount = Math.max(1, parseInt(document.getElementById('cfg-rapid-count').value) || 1);
       appConfig.rapidPos = document.getElementById('cfg-rapid-pos').value;
+      appConfig.bgMode = document.querySelector('input[name="bg-mode"]:checked').value;
       appConfig.masterVolume = parseInt(document.getElementById('cfg-master-volume').value) || 50;
       
       let newBgs = [];
@@ -524,8 +576,24 @@
     function runStageSequence() {
       stageScore = 0; stageHits = 0; isStageActive = false;
       
-      // 背景色の適用（設定値から取得）
-      container.style.backgroundColor = appConfig.bgColors[currentStage - 1];
+      // 背景の適用
+      if (appConfig.bgMode === 'color') {
+        container.style.backgroundColor = appConfig.bgColors[currentStage - 1];
+        container.style.backgroundImage = 'linear-gradient(rgba(255,255,255,0.05) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.05) 2px, transparent 2px)';
+        container.style.backgroundSize = '60px 60px';
+      } else {
+        container.style.backgroundColor = '#000';
+        const imgUrl = appConfig.bgImages[currentStage - 1];
+        if (imgUrl) {
+          container.style.backgroundImage = `url('${imgUrl}')`;
+          container.style.backgroundSize = 'cover';
+          container.style.backgroundPosition = 'center';
+        } else {
+          container.style.backgroundColor = '#34495e';
+          container.style.backgroundImage = 'linear-gradient(rgba(255,255,255,0.05) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.05) 2px, transparent 2px)';
+          container.style.backgroundSize = '60px 60px';
+        }
+      }
 
       createFormation();
 
@@ -546,7 +614,7 @@
           // ★連打的の出現（ステージ終了の5秒前）
           if (appConfig.rapidEnable) {
             let rapidSpawnTime = stageTimeMs - 5000;
-            if (rapidSpawnTime < 0) rapidSpawnTime = 0; // ステージ時間が短すぎる場合の保護
+            if (rapidSpawnTime < 0) rapidSpawnTime = 0;
             setTimeout(() => { if (isStageActive) spawnRapidTargets(); }, rapidSpawnTime);
           }
           
@@ -732,7 +800,7 @@
       
       for(let i = 0; i < count; i++) {
         let x, y;
-        y = ch - size - 100; // 画面下寄りに配置
+        y = ch - size - 100;
         
         if (pos === 'random') {
           x = Math.random() * (cw - size - 40) + 20;
@@ -756,12 +824,12 @@
       wrapper.style.height = `${size}px`;
       wrapper.style.left = `${x}px`;
       wrapper.style.top = `${y}px`;
-      wrapper.style.zIndex = "40"; // 少し手前
+      wrapper.style.zIndex = "40";
 
       const target = document.createElement('div');
       target.className = 'target rapid-target';
       target.dataset.hp = appConfig.rapidHp;
-      target.textContent = appConfig.rapidHp; // 残りHPを表示
+      target.textContent = appConfig.rapidHp;
 
       wrapper.appendChild(target);
       container.appendChild(wrapper);
@@ -786,48 +854,43 @@
     }
 
     container.addEventListener('pointerdown', (e) => {
-      if (e.clientX < 80 && e.clientY < 80 && !isStageActive) return; // 左上は除外
+      if (e.clientX < 80 && e.clientY < 80 && !isStageActive) return;
       if (!isStageActive) return; 
       e.preventDefault(); 
       const clickX = e.clientX, clickY = e.clientY;
       shootBall(clickX, clickY);
-      playCuteShootSound(); // ★発射音を再生
+      playCuteShootSound();
 
       let targetEl = e.target.closest('.target');
       if (targetEl && targetEl.classList.contains('up')) {
         
-        // ★連打的の処理
         if (targetEl.classList.contains('rapid-target')) {
           let currentHp = parseInt(targetEl.dataset.hp);
           currentHp--;
           
           if (currentHp > 0) {
-            // まだ壊れない（HPを減らしてスコア加算）
             targetEl.dataset.hp = currentHp;
             targetEl.textContent = currentHp;
             
-            // ヒットフラッシュ演出
             targetEl.classList.add('hit-flash');
             setTimeout(() => targetEl.classList.remove('hit-flash'), 100);
             
             setTimeout(() => {
-              addScore(100); // 1叩きにつき100点
+              addScore(100);
               showHitEffect(clickX, clickY, 100);
-              playNormalHitSound(); // ★通常ヒット音
+              playNormalHitSound();
             }, 150);
           } else {
-            // 破壊された場合（大きなスコアボーナス）
             targetEl.classList.remove('up');
             setTimeout(() => {
               targetEl.classList.add('down');
-              addScore(5000); // 破壊ボーナス 5000点
+              addScore(5000);
               showHitEffect(clickX, clickY, 5000);
-              playPowHitSound(); // ★破壊音を再生
+              playPowHitSound();
               setTimeout(() => targetEl.closest('.target-wrapper').remove(), 300);
             }, 150);
           }
         } 
-        // 通常の的の処理
         else {
           const points = parseInt(targetEl.dataset.points);
           targetEl.classList.remove('up');
@@ -840,15 +903,14 @@
             addScore(points);
             showHitEffect(clickX, clickY, points);
             
-            // ★点数に応じた音を再生
             if (points >= 5000) {
-              playPowHitSound(); // 5000点の特別な的
+              playPowHitSound();
             } else if (points >= 1000) {
-              playNormalHitSound(); // 1000点の移動的
+              playNormalHitSound();
             } else if (points >= 500) {
-              playNormalHitSound(); // 500点のボーナス
+              playNormalHitSound();
             } else {
-              playNormalHitSound(); // 100点の通常的
+              playNormalHitSound();
             }
           }, 150); 
         }
