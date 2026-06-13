@@ -98,7 +98,7 @@
   .target.down { transform: rotateX(90deg); }
   .target.bonus { background: radial-gradient(circle, #fff 30%, #9b59b6 35%, #9b59b6 45%, #fff 50%, #fff 60%, #9b59b6 65%); border-color: #8e44ad; color: #fff; }
   .target.moving-target { background: radial-gradient(circle, #fff 30%, #2ecc71 35%, #2ecc71 45%, #fff 50%, #fff 60%, #2ecc71 65%); border-color: #27ae60; color: #fff; border-radius: 50%; }
-  .target.random-target { background: radial-gradient(circle, #fff 30%, #f1c40f 35%, #f1c40f 45%, #fff 50%, #fff 60%, #f1c40f 65%); border-color: #f39c12; color: #d35400; border-radius: 50%; box-shadow: 0 0 30px #f39c12, 0 10px 15px rgba(0,0,0,0.6); }
+  .target.random-target { background: radial-gradient(circle, #fff 30%, #f1c40f 35%, #f1c40f 45%, #fff 50%, #fff 60%, #f1c40f 65%); border-color: #f39c12; color: #d35400; border-radius: 50%; box-shadow: 0 0 50px #f1c40f; }
   
   /* 連打的（高耐久的）のスタイル */
   .target.rapid-target {
@@ -110,13 +110,13 @@
 
   /* ボール・エフェクト・スコアポップ */
   .ball { position: absolute; width: 30px; height: 30px; background: radial-gradient(circle at 30% 30%, #f39c12, #d35400); border-radius: 50%; box-shadow: 0 5px 10px rgba(0,0,0,0.5); z-index: 50; pointer-events: none; }
-  .hit-effect { position: absolute; font-size: 40px; font-weight: bold; color: #f1c40f; text-shadow: 3px 3px 0 #d35400, -2px -2px 0 #fff; pointer-events: none; animation: hitPop 0.6s forwards; z-index: 60; }
+  .hit-effect { position: absolute; font-size: 40px; font-weight: bold; color: #f1c40f; text-shadow: 3px 3px 0 #d35400, -2px -2px 0 #fff; pointer-events: none; animation: hitPop 0.6s forwards; z-index: 150; }
   @keyframes hitPop { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 50% { transform: translate(-50%, -80%) scale(1.3); } 100% { opacity: 0; transform: translate(-50%, -100%) scale(1); } }
   #score-popup-container { position: absolute; right: 40px; bottom: 40px; z-index: 200; pointer-events: none; display: flex; flex-direction: column; align-items: flex-end; }
   .score-popup { text-align: right; animation: popBounce 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; margin-top: 10px; transform-origin: right center; }
   .score-popup .pts { font-size: 56px; font-weight: 900; color: #39ff14; -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0 #ff00ff, 0 0 15px rgba(57,255,20,0.8); display: block; line-height: 1; }
   .score-popup .tot { font-size: 28px; font-weight: bold; color: #fff; -webkit-text-stroke: 1px #000; text-shadow: 2px 2px 0 #ff4500; display: block; }
-  @keyframes popBounce { 0% { transform: scale(0) rotate(-15deg); opacity: 0; } 15% { transform: scale(1.2) rotate(5deg); opacity: 1; } 30% { transform: scale(1) rotate(-5deg); opacity: 1; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+  @keyframes popBounce { 0% { transform: scale(0) rotate(-15deg); opacity: 0; } 15% { transform: scale(1.2) rotate(5deg); opacity: 1; } 30% { transform: scale(1) rotate(-5deg); opacity: 1; } 80% { transform: scale(0.9) rotate(0deg); opacity: 0.3; } 100% { transform: scale(0) rotate(10deg); opacity: 0; } }
 
   /* UI・スクリーン画面 */
   .overlay-screen {
@@ -155,6 +155,7 @@
   .bg-mode-toggle { display: flex; gap: 10px; }
   .bg-mode-toggle label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 16px; }
   .bg-mode-toggle input[type="radio"] { width: 18px; height: 18px; cursor: pointer; }
+  .image-preview { font-size: 12px; color: #39ff14; margin-top: 5px; }
 </style>
 </head>
 <body>
@@ -263,11 +264,31 @@
         </div>
 
         <div id="image-bg-section" style="display: none;">
-          <div class="settings-row"><label>STAGE 1:</label><input type="file" id="cfg-img-1" accept="image/*"></div>
-          <div class="settings-row"><label>STAGE 2:</label><input type="file" id="cfg-img-2" accept="image/*"></div>
-          <div class="settings-row"><label>STAGE 3:</label><input type="file" id="cfg-img-3" accept="image/*"></div>
-          <div class="settings-row"><label>STAGE 4:</label><input type="file" id="cfg-img-4" accept="image/*"></div>
-          <div class="settings-row"><label>STAGE 5:</label><input type="file" id="cfg-img-5" accept="image/*"></div>
+          <div class="settings-row" style="flex-direction: column; align-items: flex-start;">
+            <label>STAGE 1:</label>
+            <input type="file" id="cfg-img-1" accept="image/*">
+            <div class="image-preview" id="preview-1"></div>
+          </div>
+          <div class="settings-row" style="flex-direction: column; align-items: flex-start;">
+            <label>STAGE 2:</label>
+            <input type="file" id="cfg-img-2" accept="image/*">
+            <div class="image-preview" id="preview-2"></div>
+          </div>
+          <div class="settings-row" style="flex-direction: column; align-items: flex-start;">
+            <label>STAGE 3:</label>
+            <input type="file" id="cfg-img-3" accept="image/*">
+            <div class="image-preview" id="preview-3"></div>
+          </div>
+          <div class="settings-row" style="flex-direction: column; align-items: flex-start;">
+            <label>STAGE 4:</label>
+            <input type="file" id="cfg-img-4" accept="image/*">
+            <div class="image-preview" id="preview-4"></div>
+          </div>
+          <div class="settings-row" style="flex-direction: column; align-items: flex-start;">
+            <label>STAGE 5:</label>
+            <input type="file" id="cfg-img-5" accept="image/*">
+            <div class="image-preview" id="preview-5"></div>
+          </div>
         </div>
 
         <h3>サウンド設定</h3>
@@ -425,6 +446,24 @@
       });
     });
 
+    // ファイル入力イベントリスナー（Data URLに変換して保存）
+    for(let i=1; i<=5; i++) {
+      const fileInput = document.getElementById(`cfg-img-${i}`);
+      const preview = document.getElementById(`preview-${i}`);
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            appConfig.bgImages[i-1] = event.target.result;
+            preview.textContent = '✓ 画像読み込み完了';
+            console.log(`Stage ${i} image loaded`);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
     // --- コンフィグ（設定値）の初期化とマイグレーション ---
     let appConfig = JSON.parse(localStorage.getItem('carnivalConfig')) || {};
     
@@ -469,8 +508,15 @@
         imageBgSection.style.display = '';
       }
       
+      // 色とプレビューを復元
       for(let i=1; i<=5; i++) {
         document.getElementById(`cfg-bg-${i}`).value = appConfig.bgColors[i-1];
+        const preview = document.getElementById(`preview-${i}`);
+        if (appConfig.bgImages[i-1]) {
+          preview.textContent = '✓ 画像設定済み';
+        } else {
+          preview.textContent = '';
+        }
       }
       document.getElementById('cfg-master-volume').value = appConfig.masterVolume;
       volumeDisplay.textContent = appConfig.masterVolume + '%';
@@ -497,6 +543,7 @@
       appConfig.bgColors = newBgs;
 
       masterVolume = appConfig.masterVolume / 100;
+      // bgImagesは既にappConfig内で更新されているため、ここで改めて保存
       localStorage.setItem('carnivalConfig', JSON.stringify(appConfig));
       settingsScreen.classList.add('hidden');
     }
